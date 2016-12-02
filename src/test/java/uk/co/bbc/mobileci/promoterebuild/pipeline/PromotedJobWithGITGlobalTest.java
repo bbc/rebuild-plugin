@@ -80,6 +80,9 @@ public class PromotedJobWithGITGlobalTest {
                         "  if( mobileCiSupport.promotion ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.fromHash\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.fromBuildNumber\n" +
+                        "    echo 'BeforeSetIsMajorRelease:' + mobileCiSupport.isMajorRelease()\n" +
+                        "    echo 'MajorReleaseSet:' + mobileCiSupport.setMajorRelease(true)\n" +
+                        "    echo 'AfterSetIsMajorRelease:' + mobileCiSupport.isMajorRelease()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -109,6 +112,9 @@ public class PromotedJobWithGITGlobalTest {
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
+        story.assertLogContains("BeforeSetIsMajorRelease:false", b);
+        story.assertLogContains("MajorReleaseSet:true", b);
+        story.assertLogContains("AfterSetIsMajorRelease:true", b);
     }
 
 

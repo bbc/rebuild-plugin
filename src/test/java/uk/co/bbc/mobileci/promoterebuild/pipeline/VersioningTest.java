@@ -72,10 +72,15 @@ public class VersioningTest {
                 WorkflowJob p = story.j.jenkins.getItemByFullName("p", WorkflowJob.class);
                 p.setDefinition(new CpsFlowDefinition(
                         "node {\n" +
-                                " echo 'majorRelease = ' + mobileCiSupport.isMajorRelease()\n" +
+                                " echo 'BeforeSetIsMajorRelease:' + mobileCiSupport.isMajorRelease()\n" +
+                                " echo 'MajorReleaseSet:' + mobileCiSupport.setMajorRelease(true)\n" +
+                                " echo 'AfterSetIsMajorRelease:' + mobileCiSupport.isMajorRelease()\n" +
                                 "}", true));
                 WorkflowRun workflowRun = doAnotherBuild(p);
-                story.j.assertLogContains("majorRelease = false", workflowRun);
+                story.j.assertLogContains("BeforeSetIsMajorRelease:false", workflowRun);
+                story.j.assertLogContains("MajorReleaseSet:false", workflowRun);
+                story.j.assertLogContains("AfterSetIsMajorRelease:false", workflowRun);
+
             }
         });
 

@@ -13,10 +13,10 @@ class Versioning {
 
     private String majorVersionKey = "majorVersion";
     private String minorVersionKey = "minorVersion";
+    private String majorReleaseKey = "majorRelease";
 
     private String majorVersionValue;
     private String minorVersionValue;
-    private boolean majorRelease;
 
     Versioning(PromotedJob job, KVStoreProxy store, int buildNumber) {
         this.job = job;
@@ -48,7 +48,25 @@ class Versioning {
         return majorVersionValue + '.' + minorVersionValue + ".0-dev." + buildNumber;
     }
 
+    boolean setMajorRelease(boolean isMajorRelease) {
+        try {
+            if (job.isPromotion()) {
+                store.store(majorReleaseKey, String.valueOf(isMajorRelease));
+            } else {
+                store.store(majorReleaseKey, String.valueOf(false));
+            }
+        } catch (IOException e) {
+            // this should not happen
+        }
+
+        if (!job.isPromotion() && isMajorRelease) {
+            return false;
+        }
+
+        return true;
+    }
+
     boolean isMajorRelease() {
-        return majorRelease;
+        return Boolean.valueOf(store.retrieve(majorReleaseKey));
     }
 }
