@@ -30,7 +30,7 @@ public class MobileCIGlobalBinding extends GlobalVariable {
         BuildChangeSet buildChangeSet = new BuildChangeSet(workflowRun);
         PromotedJob promotedJob = new PromotedJob(build);
         KVStoreProxy kvStoreProxy = new KVStoreProxy(build);
-        Versioning versioning = new Versioning(promotedJob, kvStoreProxy);
+        Versioning versioning = new Versioning(promotedJob, kvStoreProxy, build.getNumber());
         return new MobileCISupport(buildChangeSet, promotedJob, kvStoreProxy, versioning);
     }
 

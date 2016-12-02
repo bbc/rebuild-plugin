@@ -53,6 +53,21 @@ public class VersioningTest {
 
             }
         });
+
+        story.addStep(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.getItemByFullName("p", WorkflowJob.class);
+                p.setDefinition(new CpsFlowDefinition(
+                        "node {\n" +
+                                " mobileCiSupport.getVersion()\n" +
+                                " echo 'version = ' + mobileCiSupport.getVersion()\n" +
+                                "}", true));
+                WorkflowRun workflowRun = doAnotherBuild(p);
+                story.j.assertLogContains("version = 7.1.0-dev." + workOutBuildNumber(p), workflowRun);
+            }
+        });
+
     }
 
     private WorkflowRun doAnotherBuild(WorkflowJob p) throws Exception {
@@ -60,5 +75,9 @@ public class VersioningTest {
         story.j.waitForCompletion(workflowRun);
         story.j.assertBuildStatusSuccess(workflowRun);
         return workflowRun;
+    }
+
+    private int workOutBuildNumber(WorkflowJob p) {
+        return p.getLastCompletedBuild().getNumber();
     }
 }

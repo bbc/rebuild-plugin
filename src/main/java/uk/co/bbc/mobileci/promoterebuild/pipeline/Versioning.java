@@ -7,6 +7,7 @@ public class Versioning {
 
     private final PromotedJob job;
     private final KVStoreProxy store;
+    private final int buildNumber;
 
     private String majorVersionKey = "majorVersion";
     private String minorVersionKey = "minorVersion";
@@ -14,9 +15,10 @@ public class Versioning {
     private String majorVersionValue;
     private String minorVersionValue;
 
-    public Versioning(PromotedJob job, KVStoreProxy store) {
+    public Versioning(PromotedJob job, KVStoreProxy store, int buildNumber) {
         this.job = job;
         this.store = store;
+        this.buildNumber = buildNumber;
     }
 
     public boolean isVersionSet() {
@@ -29,5 +31,12 @@ public class Versioning {
         }
 
         return set;
+    }
+
+    public String getVersion() {
+        majorVersionValue = store.retrieve(majorVersionKey);
+        minorVersionValue = store.retrieve(minorVersionKey);
+
+        return majorVersionValue + '.' + minorVersionValue + ".0-dev." + buildNumber;
     }
 }

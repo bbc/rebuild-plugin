@@ -90,4 +90,10 @@ public final class MobileCISupport {
     public boolean isVersionSet() {
         return versioning.isVersionSet();
     }
+
+    @NonCPS
+    @Whitelisted
+    public String getVersion() {
+        return versioning.getVersion();
+    }
 }
