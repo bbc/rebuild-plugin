@@ -12,11 +12,13 @@ public final class MobileCISupport {
     private BuildChangeSet buildChangeSet;
     private PromotedJob promotedJob;
     private KVStoreProxy kvStoreProxy;
+    private Versioning versioning;
 
-    public MobileCISupport(BuildChangeSet buildChangeSet, PromotedJob promotedJob, KVStoreProxy kvStoreProxy) {
+    public MobileCISupport(BuildChangeSet buildChangeSet, PromotedJob promotedJob, KVStoreProxy kvStoreProxy, Versioning versioning) {
         this.buildChangeSet = buildChangeSet;
         this.promotedJob = promotedJob;
         this.kvStoreProxy = kvStoreProxy;
+        this.versioning = versioning;
     }
 
     @NonCPS
@@ -81,5 +83,11 @@ public final class MobileCISupport {
     @Whitelisted
     public Collection<String> getBranchNames() {
         return buildChangeSet.getBranchNames();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public boolean isVersionSet() {
+        return versioning.isVersionSet();
     }
 }
