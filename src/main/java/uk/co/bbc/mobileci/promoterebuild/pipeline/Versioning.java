@@ -1,9 +1,11 @@
 package uk.co.bbc.mobileci.promoterebuild.pipeline;
 
+import java.io.IOException;
+
 /**
  * Copyright © 2016 Media Applications Technologies. All rights reserved.
  */
-public class Versioning {
+class Versioning {
 
     private final PromotedJob job;
     private final KVStoreProxy store;
@@ -15,13 +17,13 @@ public class Versioning {
     private String majorVersionValue;
     private String minorVersionValue;
 
-    public Versioning(PromotedJob job, KVStoreProxy store, int buildNumber) {
+    Versioning(PromotedJob job, KVStoreProxy store, int buildNumber) {
         this.job = job;
         this.store = store;
         this.buildNumber = buildNumber;
     }
 
-    public boolean isVersionSet() {
+    boolean isVersionSet() {
         boolean set = false;
         majorVersionValue = store.retrieve(majorVersionKey);
         minorVersionValue = store.retrieve(minorVersionKey);
@@ -33,7 +35,12 @@ public class Versioning {
         return set;
     }
 
-    public String getVersion() {
+    void setVersion(String majorVersion, String minorVersion) throws IOException {
+        store.store(majorVersionKey, majorVersion);
+        store.store(minorVersionKey, minorVersion);
+    }
+
+    String getVersion() {
         majorVersionValue = store.retrieve(majorVersionKey);
         minorVersionValue = store.retrieve(minorVersionKey);
 

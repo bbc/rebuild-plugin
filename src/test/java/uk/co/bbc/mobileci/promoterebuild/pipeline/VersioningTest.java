@@ -44,8 +44,7 @@ public class VersioningTest {
                 WorkflowJob p = story.j.jenkins.getItemByFullName("p", WorkflowJob.class);
                 p.setDefinition(new CpsFlowDefinition(
                         "node {\n" +
-                                " mobileCiSupport.store('majorVersion','7')\n" +
-                                " mobileCiSupport.store('minorVersion', '1')\n" +
+                                " mobileCiSupport.setVersion('7', '1')\n" +
                                 " echo 'version set = ' + mobileCiSupport.isVersionSet()\n" +
                                 "}", true));
                 WorkflowRun workflowRun = doAnotherBuild(p);

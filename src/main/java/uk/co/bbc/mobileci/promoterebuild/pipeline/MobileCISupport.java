@@ -52,13 +52,13 @@ public final class MobileCISupport {
     }
 
     public String toString() {
-        return "PromotedJob: from: " +getFromBuildNumber() + " for:"+getFromHash();
+        return "PromotedJob: from: " + getFromBuildNumber() + " for:" + getFromHash();
     }
 
     @NonCPS
     @Whitelisted
     public void store(String key, String value) throws IOException {
-        kvStoreProxy.store(key,value);
+        kvStoreProxy.store(key, value);
     }
 
     @NonCPS
@@ -89,6 +89,12 @@ public final class MobileCISupport {
     @Whitelisted
     public boolean isVersionSet() {
         return versioning.isVersionSet();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public void setVersion(String majorVersion, String minorVersion) throws IOException {
+        versioning.setVersion(majorVersion, minorVersion);
     }
 
     @NonCPS
