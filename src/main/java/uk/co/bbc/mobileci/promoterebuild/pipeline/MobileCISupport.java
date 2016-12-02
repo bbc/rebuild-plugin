@@ -102,4 +102,10 @@ public final class MobileCISupport {
     public String getVersion() {
         return versioning.getVersion();
     }
+
+    @NonCPS
+    @Whitelisted
+    public boolean isMajorRelease() {
+        return versioning.isMajorRelease();
+    }
 }

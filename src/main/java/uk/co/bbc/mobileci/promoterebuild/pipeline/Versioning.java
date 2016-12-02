@@ -16,6 +16,7 @@ class Versioning {
 
     private String majorVersionValue;
     private String minorVersionValue;
+    private boolean majorRelease;
 
     Versioning(PromotedJob job, KVStoreProxy store, int buildNumber) {
         this.job = job;
@@ -45,5 +46,9 @@ class Versioning {
         minorVersionValue = store.retrieve(minorVersionKey);
 
         return majorVersionValue + '.' + minorVersionValue + ".0-dev." + buildNumber;
+    }
+
+    boolean isMajorRelease() {
+        return majorRelease;
     }
 }
