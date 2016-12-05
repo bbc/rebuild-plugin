@@ -36,10 +36,12 @@ public class PromotedJobWithGITGlobalTest {
         String scriptThatLogsAssertableStrings =
                 "node " +
                         "{\n" +
+                        "  mobileCiSupport.setVersion('1', '5')\n" +
                         "  if( mobileCiSupport.isPromotion() ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.getFromHash()\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.getFromBuildNumber()\n" +
                         "    echo 'MAJOR_RELEASE:' + mobileCiSupport.isMajorRelease()\n" +
+                        "    echo 'VERSION:' + mobileCiSupport.getTargetVersion()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -69,6 +71,7 @@ public class PromotedJobWithGITGlobalTest {
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
         story.assertLogContains("MAJOR_RELEASE:false", b);
+        story.assertLogContains("VERSION:1.6.0", b);
     }
 
 
@@ -79,10 +82,12 @@ public class PromotedJobWithGITGlobalTest {
         String script =
                 "node " +
                         "{\n" +
+                        "  mobileCiSupport.setVersion('5', '11')\n" +
                         "  if( mobileCiSupport.promotion ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.fromHash\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.fromBuildNumber\n" +
                         "    echo 'MAJOR_RELEASE:' + mobileCiSupport.isMajorRelease()\n" +
+                        "    echo 'VERSION:' + mobileCiSupport.getTargetVersion()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -113,6 +118,7 @@ public class PromotedJobWithGITGlobalTest {
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
         story.assertLogContains("MAJOR_RELEASE:true", b);
+        story.assertLogContains("VERSION:6.0.0", b);
     }
 
 

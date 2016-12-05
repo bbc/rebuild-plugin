@@ -59,7 +59,7 @@ public class VersioningTest {
                 WorkflowJob p = story.j.jenkins.getItemByFullName("p", WorkflowJob.class);
                 p.setDefinition(new CpsFlowDefinition(
                         "node {\n" +
-                                " echo 'version = ' + mobileCiSupport.getVersion()\n" +
+                                " echo 'version = ' + mobileCiSupport.getTargetVersion()\n" +
                                 "}", true));
                 WorkflowRun workflowRun = doAnotherBuild(p);
                 story.j.assertLogContains("version = 7.1.0-dev." + workOutBuildNumber(p), workflowRun);

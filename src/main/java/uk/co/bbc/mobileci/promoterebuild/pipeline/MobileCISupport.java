@@ -99,8 +99,8 @@ public final class MobileCISupport {
 
     @NonCPS
     @Whitelisted
-    public String getVersion() {
-        return versioning.getVersion();
+    public String getTargetVersion() {
+        return versioning.getTargetVersion();
     }
 
     @NonCPS
