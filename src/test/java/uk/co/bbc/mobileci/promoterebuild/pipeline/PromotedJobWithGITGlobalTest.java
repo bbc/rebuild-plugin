@@ -39,6 +39,7 @@ public class PromotedJobWithGITGlobalTest {
                         "  if( mobileCiSupport.isPromotion() ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.getFromHash()\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.getFromBuildNumber()\n" +
+                        "    echo 'MAJOR_RELEASE:' + mobileCiSupport.isMajorRelease()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -62,11 +63,12 @@ public class PromotedJobWithGITGlobalTest {
         story.waitForCompletion(p.scheduleBuild2(0).get());
 
 
-        b = promoteBuildNumber(p, 2);
+        b = promoteMinorReleaseBuildNumber(p, 2);
         story.assertBuildStatusSuccess(b);
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
+        story.assertLogContains("MAJOR_RELEASE:false", b);
     }
 
 
@@ -80,6 +82,7 @@ public class PromotedJobWithGITGlobalTest {
                         "  if( mobileCiSupport.promotion ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.fromHash\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.fromBuildNumber\n" +
+                        "    echo 'MAJOR_RELEASE:' + mobileCiSupport.isMajorRelease()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -104,11 +107,12 @@ public class PromotedJobWithGITGlobalTest {
         story.waitForCompletion(p.scheduleBuild2(0).get());
 
         //PROMOTE build 2
-        b = promoteBuildNumber(p, 2);
+        b = promoteMajorReleaseBuildNumber(p, 2);
         story.assertBuildStatusSuccess(b);
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
+        story.assertLogContains("MAJOR_RELEASE:true", b);
     }
 
 
@@ -136,10 +140,18 @@ public class PromotedJobWithGITGlobalTest {
         sampleRepo.git("commit", "--message=files");
     }
 
-    private WorkflowRun promoteBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
+    private WorkflowRun promoteMajorReleaseBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
+        return promoteBuildNumber(p, buildNumber, "?major");
+    }
+
+    private WorkflowRun promoteMinorReleaseBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
+        return promoteBuildNumber(p, buildNumber, "?minor");
+    }
+
+    private WorkflowRun promoteBuildNumber(WorkflowJob p, int buildNumber, String query) throws IOException, SAXException, InterruptedException {
         WorkflowRun b;
         b = p.getBuildByNumber(buildNumber);
-        story.createWebClient().getPage(b, "promoterebuild");
+        story.createWebClient().getPage(b, "promoterebuild" + query);
         b = p.getLastBuild();
         story.waitForCompletion(b);
         return b;
