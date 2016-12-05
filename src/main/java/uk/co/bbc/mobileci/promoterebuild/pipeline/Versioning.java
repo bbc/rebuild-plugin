@@ -13,7 +13,6 @@ class Versioning {
 
     private String majorVersionKey = "majorVersion";
     private String minorVersionKey = "minorVersion";
-    private String majorReleaseKey = "majorRelease";
 
     private String majorVersionValue;
     private String minorVersionValue;
@@ -46,27 +45,5 @@ class Versioning {
         minorVersionValue = store.retrieve(minorVersionKey);
 
         return majorVersionValue + '.' + minorVersionValue + ".0-dev." + buildNumber;
-    }
-
-    boolean setMajorRelease(boolean isMajorRelease) {
-        try {
-            if (job.isPromotion()) {
-                store.store(majorReleaseKey, String.valueOf(isMajorRelease));
-            } else {
-                store.store(majorReleaseKey, String.valueOf(false));
-            }
-        } catch (IOException e) {
-            // this should not happen
-        }
-
-        if (!job.isPromotion() && isMajorRelease) {
-            return false;
-        }
-
-        return true;
-    }
-
-    boolean isMajorRelease() {
-        return Boolean.valueOf(store.retrieve(majorReleaseKey));
     }
 }

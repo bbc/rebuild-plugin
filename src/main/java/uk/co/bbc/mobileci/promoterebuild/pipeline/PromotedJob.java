@@ -13,6 +13,7 @@ public final class PromotedJob {
     @Whitelisted
     private boolean promotion;
     private String fromBuildNumber;
+    private boolean isMajorRelease;
 
     public PromotedJob(Run<?, ?> build) {
         PromoteRebuildCauseAction action = build.getAction(PromoteRebuildCauseAction.class);
@@ -21,6 +22,7 @@ public final class PromotedJob {
             PromoteRebuildCauseAction.PromoteRebuildCause promoteRebuildCause = action.getPromoteRebuildCause();
             this.hash = promoteRebuildCause.getBuildHash();
             this.fromBuildNumber = String.valueOf(promoteRebuildCause.getUpstreamBuild());
+            this.isMajorRelease = promoteRebuildCause.isMajorRelease();
         }
     }
 
@@ -37,6 +39,11 @@ public final class PromotedJob {
     @Whitelisted
     public String getFromBuildNumber() {
         return fromBuildNumber;
+    }
+
+    @Whitelisted
+    public boolean isMajorRelease() {
+        return isMajorRelease;
     }
 
     public String toString() {

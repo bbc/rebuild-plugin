@@ -23,9 +23,7 @@
  */
 package uk.co.bbc.mobileci.promoterebuild;
 
-import hudson.model.Action;
-import hudson.model.Cause;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
 import org.eclipse.jgit.lib.ObjectId;
@@ -79,9 +77,9 @@ public class PromoteRebuildCauseAction implements Action {
     @ExportedBean
     public static class PromoteRebuildCause {
 
-
         private final Cause.UpstreamCause upstreamCause;
         private String buildHash;
+        private boolean isMajorRelease;
 
         public PromoteRebuildCause(Run<?, ?> up) {
             upstreamCause = new Cause.UpstreamCause(up);
@@ -93,6 +91,16 @@ public class PromoteRebuildCauseAction implements Action {
                     if (sha1!=null) {
                         this.buildHash = sha1.getName();
                     }
+                }
+            }
+
+            ParametersAction parameterAction = up.getAction(ParametersAction.class);
+            if (parameterAction != null) {
+                ParameterValue major = parameterAction.getParameter("major");
+
+                if (major instanceof BooleanParameterValue) {
+                    BooleanParameterValue promotionType = (BooleanParameterValue) major;
+                    isMajorRelease = promotionType.getValue();
                 }
             }
         }
@@ -127,6 +135,10 @@ public class PromoteRebuildCauseAction implements Action {
 
         public String getBuildHash() {
             return this.buildHash;
+        }
+
+        public boolean isMajorRelease() {
+            return this.isMajorRelease;
         }
     }
 }

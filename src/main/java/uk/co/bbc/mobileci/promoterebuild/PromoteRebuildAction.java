@@ -24,7 +24,6 @@
  */
 package uk.co.bbc.mobileci.promoterebuild;
 
-import hudson.Extension;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
 import hudson.plugins.git.RevisionParameterAction;
@@ -48,6 +47,8 @@ import java.util.List;
 public class PromoteRebuildAction implements Action {
 
     private static final String SVN_TAG_PARAM_CLASS = "hudson.scm.listtagsparameter.ListSubversionTagsParameterValue";
+    private static final String MAJOR_RELEASE = "major";
+    private static final String MINOR_RELEASE = "minor";
     /*
      * All the below transient variables are declared only for backward
      * compatibility of the rebuild plugin.
@@ -161,13 +162,34 @@ public class PromoteRebuildAction implements Action {
     public void doIndex(StaplerRequest request, StaplerResponse response) throws IOException, ServletException, InterruptedException {
         Run currentBuild = request.findAncestorObject(Run.class);
         if (currentBuild != null) {
+            ParametersAction action = createReleaseTypeAction(request);
+            if (action != null) {
+                currentBuild.addAction(action);
+            }
+
             ParametersAction paramAction = currentBuild.getAction(ParametersAction.class);
+
             if (paramAction != null) {
                     parameterizedRebuild(currentBuild, response);
             } else {
                 nonParameterizedRebuild(currentBuild, response);
             }
         }
+    }
+
+    private ParametersAction createReleaseTypeAction(StaplerRequest request) {
+        ParametersAction newAction = null;
+        String queryString = request.getQueryString();
+
+        if (queryString != null) {
+            if (queryString.contentEquals(MAJOR_RELEASE)) {
+                newAction = new ParametersAction(new BooleanParameterValue(MAJOR_RELEASE, true));
+            } else if (queryString.contentEquals(MINOR_RELEASE)) {
+                newAction = new ParametersAction(new BooleanParameterValue(MAJOR_RELEASE, false));
+            }
+        }
+
+        return newAction;
     }
     /**
      * Handles the rebuild request with parameter.

@@ -105,13 +105,7 @@ public final class MobileCISupport {
 
     @NonCPS
     @Whitelisted
-    public boolean setMajorRelease(boolean isMajorRelease) {
-        return versioning.setMajorRelease(isMajorRelease);
-    }
-
-    @NonCPS
-    @Whitelisted
     public boolean isMajorRelease() {
-        return versioning.isMajorRelease();
+        return promotedJob.isMajorRelease();
     }
 }
