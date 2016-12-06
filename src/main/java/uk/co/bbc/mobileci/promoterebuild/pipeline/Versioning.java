@@ -36,16 +36,16 @@ class Versioning {
         store.store(minorVersionKey, minorVersion);
     }
 
-    String getTargetVersion() {
+    String getTargetVersion() throws NumberFormatException {
         String majorVersion = store.retrieve(majorVersionKey);
         String minorVersion = store.retrieve(minorVersionKey);
 
         if (job.isPromotion()) {
             if (job.isMajorRelease()) {
-                int majorInt = Integer.valueOf(majorVersion) + 1;
+                int majorInt = Integer.parseInt(majorVersion) + 1;
                 return "" + majorInt + ".0.0";
             } else {
-                int minorInt = Integer.valueOf(minorVersion) +1;
+                int minorInt = Integer.parseInt(minorVersion) +1;
                 return majorVersion + "." + minorInt + ".0";
             }
         }
@@ -53,21 +53,21 @@ class Versioning {
         return "" + majorVersion + "." + minorVersion + ".0-dev." + buildNumber;
     }
 
-    void storeTargetVersion() throws IOException {
+    void storeTargetVersion() throws IOException, NumberFormatException {
         if (job.isPromotion()) {
             if (job.isMajorRelease()) {
                 String majorVersion = store.retrieve(majorVersionKey);
-                int majorInt = Integer.valueOf(majorVersion) + 1;
+                int majorInt = Integer.parseInt(majorVersion) + 1;
                 store.store(majorVersionKey, String.valueOf(majorInt));
             } else {
                 String minorVersion = store.retrieve(minorVersionKey);
-                int minorInt = Integer.valueOf(minorVersion) +1;
+                int minorInt = Integer.parseInt(minorVersion) +1;
                 store.store(minorVersionKey, String.valueOf(minorInt));
             }
         }
     }
 
-    public String getFinalVersion() {
+    String getFinalVersion() {
         String majorVersion = store.retrieve(majorVersionKey);
         String minorVersion = store.retrieve(minorVersionKey);
 
