@@ -12,7 +12,7 @@ node {
 }
 </code></pre>
 
-<p>If the build uses semantic versioning, two badges can be added to the job and will trigger either a major or minor promotion build.<p>
+<p>If the build uses semantic versioning, two badges can be added to the job and will trigger either a major or minor promotion build.</p>
 <pre><code>
 node {
  stagePromotion {
