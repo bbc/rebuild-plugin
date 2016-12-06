@@ -13,12 +13,11 @@ def call(body = {}) {
     //echo promoUrl
 
     if (config.size() == 1) {
-        manager.addBadge('clock.png', config.message, majorPromoUrl)
+        manager.addBadge('/plugin/promoterebuild/images/major.png', config.message, majorPromoUrl)
     } else {
-        manager.addBadge('clock.png', config.majorReleaseMessage, majorPromoUrl)
-        manager.addBadge('warning.png', config.minorReleaseMessage, minorPromoUrl)
+        manager.addBadge('/plugin/promoterebuild/images/major.png', config.majorReleaseMessage, majorPromoUrl)
+        manager.addBadge('/plugin/promoterebuild/images/minor.png', config.minorReleaseMessage, minorPromoUrl)
     }
-
 }
 
 class StagePromotionDelegate implements Serializable {
