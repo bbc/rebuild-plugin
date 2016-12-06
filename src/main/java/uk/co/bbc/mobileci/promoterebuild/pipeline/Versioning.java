@@ -52,4 +52,33 @@ class Versioning {
 
         return "" + majorVersion + "." + minorVersion + ".0-dev." + buildNumber;
     }
+
+    void storeTargetVersion() throws IOException {
+        if (job.isPromotion()) {
+            if (job.isMajorRelease()) {
+                String majorVersion = store.retrieve(majorVersionKey);
+                int majorInt = Integer.valueOf(majorVersion) + 1;
+                store.store(majorVersionKey, String.valueOf(majorInt));
+            } else {
+                String minorVersion = store.retrieve(minorVersionKey);
+                int minorInt = Integer.valueOf(minorVersion) +1;
+                store.store(minorVersionKey, String.valueOf(minorInt));
+            }
+        }
+    }
+
+    public String getFinalVersion() {
+        String majorVersion = store.retrieve(majorVersionKey);
+        String minorVersion = store.retrieve(minorVersionKey);
+
+        if (job.isPromotion()) {
+            if (job.isMajorRelease()) {
+                return "" + majorVersion + ".0.0";
+            } else {
+                return majorVersion + "." + minorVersion + ".0";
+            }
+        }
+
+        return "" + majorVersion + "." + minorVersion + ".0-dev." + buildNumber;
+    }
 }

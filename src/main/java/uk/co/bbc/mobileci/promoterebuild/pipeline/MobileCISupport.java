@@ -105,7 +105,13 @@ public final class MobileCISupport {
 
     @NonCPS
     @Whitelisted
-    public boolean isMajorRelease() {
-        return promotedJob.isMajorRelease();
+    public void storeTargetVersion() throws IOException {
+        versioning.storeTargetVersion();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public String getFinalVersion() {
+        return versioning.getFinalVersion();
     }
 }

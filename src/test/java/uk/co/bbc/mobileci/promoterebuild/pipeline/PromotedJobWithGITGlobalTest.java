@@ -40,9 +40,9 @@ public class PromotedJobWithGITGlobalTest {
                         "  if( mobileCiSupport.isPromotion() ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.getFromHash()\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.getFromBuildNumber()\n" +
-                        "    echo 'MAJOR_RELEASE:' + mobileCiSupport.isMajorRelease()\n" +
-                        "    echo 'VERSION:' + mobileCiSupport.getTargetVersion()\n" +
-                        "    \n" +
+                        "    echo 'TARGET_VERSION:' + mobileCiSupport.getTargetVersion()\n" +
+                        "    mobileCiSupport.storeTargetVersion()\n" +
+                        "    echo 'FINAL_VERSION:' + mobileCiSupport.getFinalVersion()\n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
                         "    \n" +
@@ -70,8 +70,8 @@ public class PromotedJobWithGITGlobalTest {
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
-        story.assertLogContains("MAJOR_RELEASE:false", b);
-        story.assertLogContains("VERSION:1.6.0", b);
+        story.assertLogContains("TARGET_VERSION:1.6.0", b);
+        story.assertLogContains("FINAL_VERSION:1.6.0", b);
     }
 
 
@@ -86,8 +86,9 @@ public class PromotedJobWithGITGlobalTest {
                         "  if( mobileCiSupport.promotion ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.fromHash\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.fromBuildNumber\n" +
-                        "    echo 'MAJOR_RELEASE:' + mobileCiSupport.isMajorRelease()\n" +
-                        "    echo 'VERSION:' + mobileCiSupport.getTargetVersion()\n" +
+                        "    echo 'TARGET_VERSION:' + mobileCiSupport.getTargetVersion()\n" +
+                        "    mobileCiSupport.storeTargetVersion()\n" +
+                        "    echo 'FINAL_VERSION:' + mobileCiSupport.getFinalVersion()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -117,8 +118,8 @@ public class PromotedJobWithGITGlobalTest {
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
-        story.assertLogContains("MAJOR_RELEASE:true", b);
-        story.assertLogContains("VERSION:6.0.0", b);
+        story.assertLogContains("TARGET_VERSION:6.0.0", b);
+        story.assertLogContains("FINAL_VERSION:6.0.0", b);
     }
 
 
