@@ -12,11 +12,13 @@ public final class MobileCISupport {
     private BuildChangeSet buildChangeSet;
     private PromotedJob promotedJob;
     private KVStoreProxy kvStoreProxy;
+    private Versioning versioning;
 
-    public MobileCISupport(BuildChangeSet buildChangeSet, PromotedJob promotedJob, KVStoreProxy kvStoreProxy) {
+    public MobileCISupport(BuildChangeSet buildChangeSet, PromotedJob promotedJob, KVStoreProxy kvStoreProxy, Versioning versioning) {
         this.buildChangeSet = buildChangeSet;
         this.promotedJob = promotedJob;
         this.kvStoreProxy = kvStoreProxy;
+        this.versioning = versioning;
     }
 
     @NonCPS
@@ -50,13 +52,13 @@ public final class MobileCISupport {
     }
 
     public String toString() {
-        return "PromotedJob: from: " +getFromBuildNumber() + " for:"+getFromHash();
+        return "PromotedJob: from: " + getFromBuildNumber() + " for:" + getFromHash();
     }
 
     @NonCPS
     @Whitelisted
     public void store(String key, String value) throws IOException {
-        kvStoreProxy.store(key,value);
+        kvStoreProxy.store(key, value);
     }
 
     @NonCPS
@@ -81,5 +83,35 @@ public final class MobileCISupport {
     @Whitelisted
     public Collection<String> getBranchNames() {
         return buildChangeSet.getBranchNames();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public boolean isVersionSet() {
+        return versioning.isVersionSet();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public void setVersion(String majorVersion, String minorVersion) throws IOException {
+        versioning.setVersion(majorVersion, minorVersion);
+    }
+
+    @NonCPS
+    @Whitelisted
+    public String getTargetVersion() {
+        return versioning.getTargetVersion();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public void storeTargetVersion() throws IOException {
+        versioning.storeTargetVersion();
+    }
+
+    @NonCPS
+    @Whitelisted
+    public String getFinalVersion() {
+        return versioning.getFinalVersion();
     }
 }

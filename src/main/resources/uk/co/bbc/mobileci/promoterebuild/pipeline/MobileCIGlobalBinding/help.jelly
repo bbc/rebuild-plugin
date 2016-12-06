@@ -11,6 +11,12 @@
 <p>mobileCiSupport.retrieve('valueKey'), this can be used to retrieve a string</p>
 <p>mobileCiSupport.getChangeSet(), this will return the changes since the last build of the job</p>
 <p>mobileCiSupport.getBranchName(), this will be the branch name of the build being run</p>
+<p>mobileCiSupport.isVersionSet(), true if version set, false otherwise. If version is not set pipeline script should prompt user to enter major and minor build numbers</p>
+<p>mobileCiSupport.setVersion(major, minor), used to update the store</p>
+<p>mobileCiSupport.getTargetVersion(), returns the version being built (uses semantic versioning)</p>
+<p>mobileCiSupport.getFinalVersion(), returns the stored version (uses semantic versioning depending on the current build's promotion and major/minor states</p>
+<p>mobileCiSupport.storeTargetVersion(), stores the targetVersion, should be called when the build is considered successful. In the current build, if this version number is required for later stages MUST use getFinalVersion() instead of getTargetVersion()</p>
+
 <h4>For example</h4>
 <pre><code>
 node {

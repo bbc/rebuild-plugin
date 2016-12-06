@@ -2,12 +2,22 @@
 <?jelly escape-by-default='true'?>
 <div>
 <p>Provided by PromoteRebuild plugin, github plugin location https://github.com/bbc/mobileci-jenkins-support</p>
-<p>This stages this build for promotion.</p>
+<p>There are two ways in which to stage this build for promotion.</p>
 <p>A badge is added to the job which when clicked will rebuild linking back to this job. See global promotedJob for more information</p>
 <pre><code>
 node {
  stagePromotion {
     message 'testing a release'
+ }
+}
+</code></pre>
+
+<p>If the build uses semantic versioning, two badges can be added to the job and will trigger either a major or minor promotion build.</p>
+<pre><code>
+node {
+ stagePromotion {
+    majorReleaseMessage 'Promote a major build?'
+    minorReleaseMessage 'Promote a minor build?'
  }
 }
 </code></pre>

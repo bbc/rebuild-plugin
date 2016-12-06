@@ -1,13 +1,8 @@
 package uk.co.bbc.mobileci.promoterebuild.pipeline;
 
-import hudson.model.Job;
 import hudson.model.Run;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import uk.co.bbc.mobileci.promoterebuild.PromoteRebuildCauseAction;
-
-import java.io.IOException;
-import java.util.Collection;
 
 /**
 * Created by beazlr02 on 04/05/16.
@@ -18,6 +13,7 @@ public final class PromotedJob {
     @Whitelisted
     private boolean promotion;
     private String fromBuildNumber;
+    private boolean isMajorRelease;
 
     public PromotedJob(Run<?, ?> build) {
         PromoteRebuildCauseAction action = build.getAction(PromoteRebuildCauseAction.class);
@@ -26,6 +22,7 @@ public final class PromotedJob {
             PromoteRebuildCauseAction.PromoteRebuildCause promoteRebuildCause = action.getPromoteRebuildCause();
             this.hash = promoteRebuildCause.getBuildHash();
             this.fromBuildNumber = String.valueOf(promoteRebuildCause.getUpstreamBuild());
+            this.isMajorRelease = promoteRebuildCause.isMajorRelease();
         }
     }
 
@@ -44,8 +41,12 @@ public final class PromotedJob {
         return fromBuildNumber;
     }
 
+    @Whitelisted
+    public boolean isMajorRelease() {
+        return isMajorRelease;
+    }
+
     public String toString() {
         return "PromotedJob: from: " +getFromBuildNumber() + " for:"+getHash();
     }
-
 }

@@ -29,7 +29,7 @@ public class StagePromotionDSLTest  {
 
         assertEquals("Promote to RELEASE", run.getAction(GroovyPostbuildAction.class).getText());
 
-        String expectedPromoteUrl = "/" + p.getBuildByNumber(1).getUrl() + "promoterebuild";
+        String expectedPromoteUrl = "/" + p.getBuildByNumber(1).getUrl() + "promoterebuild?major";
         assertEquals(expectedPromoteUrl, run.getAction(GroovyPostbuildAction.class).getLink());
 
     }
@@ -45,7 +45,7 @@ public class StagePromotionDSLTest  {
 
         assertEquals("Promote to RELEASE", run.getAction(GroovyPostbuildAction.class).getText());
 
-        String expectedPromoteUrl = "/" + p.getBuildByNumber(1).getUrl() + "promoterebuild";
+        String expectedPromoteUrl = "/" + p.getBuildByNumber(1).getUrl() + "promoterebuild?major";
         assertEquals(expectedPromoteUrl, run.getAction(GroovyPostbuildAction.class).getLink());
 
     }

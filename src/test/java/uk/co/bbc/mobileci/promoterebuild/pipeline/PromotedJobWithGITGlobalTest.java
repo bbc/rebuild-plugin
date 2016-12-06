@@ -36,10 +36,13 @@ public class PromotedJobWithGITGlobalTest {
         String scriptThatLogsAssertableStrings =
                 "node " +
                         "{\n" +
+                        "  mobileCiSupport.setVersion('1', '5')\n" +
                         "  if( mobileCiSupport.isPromotion() ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.getFromHash()\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.getFromBuildNumber()\n" +
-                        "    \n" +
+                        "    echo 'TARGET_VERSION:' + mobileCiSupport.getTargetVersion()\n" +
+                        "    mobileCiSupport.storeTargetVersion()\n" +
+                        "    echo 'FINAL_VERSION:' + mobileCiSupport.getFinalVersion()\n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
                         "    \n" +
@@ -62,11 +65,13 @@ public class PromotedJobWithGITGlobalTest {
         story.waitForCompletion(p.scheduleBuild2(0).get());
 
 
-        b = promoteBuildNumber(p, 2);
+        b = promoteMinorReleaseBuildNumber(p, 2);
         story.assertBuildStatusSuccess(b);
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
+        story.assertLogContains("TARGET_VERSION:1.6.0", b);
+        story.assertLogContains("FINAL_VERSION:1.6.0", b);
     }
 
 
@@ -77,9 +82,13 @@ public class PromotedJobWithGITGlobalTest {
         String script =
                 "node " +
                         "{\n" +
+                        "  mobileCiSupport.setVersion('5', '11')\n" +
                         "  if( mobileCiSupport.promotion ) {" +
                         "    echo 'PROMOTED:' + mobileCiSupport.fromHash\n" +
                         "    echo 'BUILDNUMBER:' + mobileCiSupport.fromBuildNumber\n" +
+                        "    echo 'TARGET_VERSION:' + mobileCiSupport.getTargetVersion()\n" +
+                        "    mobileCiSupport.storeTargetVersion()\n" +
+                        "    echo 'FINAL_VERSION:' + mobileCiSupport.getFinalVersion()\n" +
                         "    \n" +
                         "  } else {\n" +
                         "    echo 'not a promotion'\n" +
@@ -104,14 +113,14 @@ public class PromotedJobWithGITGlobalTest {
         story.waitForCompletion(p.scheduleBuild2(0).get());
 
         //PROMOTE build 2
-        b = promoteBuildNumber(p, 2);
+        b = promoteMajorReleaseBuildNumber(p, 2);
         story.assertBuildStatusSuccess(b);
 
         story.assertLogContains("PROMOTED:"+masterHeadHash, b);
         story.assertLogContains("BUILDNUMBER:2", b);
+        story.assertLogContains("TARGET_VERSION:6.0.0", b);
+        story.assertLogContains("FINAL_VERSION:6.0.0", b);
     }
-
-
 
 
     private WorkflowJob setupPipelineInJenkins(JenkinsRule story, GitSampleRepoRule sampleRepo) throws java.io.IOException {
@@ -138,10 +147,18 @@ public class PromotedJobWithGITGlobalTest {
         sampleRepo.git("commit", "--message=files");
     }
 
-    private WorkflowRun promoteBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
+    private WorkflowRun promoteMajorReleaseBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
+        return promoteBuildNumber(p, buildNumber, "?major");
+    }
+
+    private WorkflowRun promoteMinorReleaseBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
+        return promoteBuildNumber(p, buildNumber, "?minor");
+    }
+
+    private WorkflowRun promoteBuildNumber(WorkflowJob p, int buildNumber, String query) throws IOException, SAXException, InterruptedException {
         WorkflowRun b;
         b = p.getBuildByNumber(buildNumber);
-        story.createWebClient().getPage(b, "promoterebuild");
+        story.createWebClient().getPage(b, "promoterebuild" + query);
         b = p.getLastBuild();
         story.waitForCompletion(b);
         return b;
