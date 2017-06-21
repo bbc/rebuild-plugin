@@ -27,7 +27,9 @@ import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.export.Exported;
@@ -94,7 +96,17 @@ public class PromoteRebuildCauseAction implements Action {
                 List<BuildData> actions = up.getActions(BuildData.class);
                 Map<String, String> commitHashes = new HashMap<>();
                 for (BuildData action : actions) {
-                    commitHashes.put(action.getRemoteUrls().iterator().next(), action.getLastBuiltRevision().getSha1().getName());
+                    if(action.getRemoteUrls().iterator().hasNext()) {
+                        String remote = action.getRemoteUrls().iterator().next();
+                        Revision lastBuiltRevision = action.getLastBuiltRevision();
+                        if (lastBuiltRevision != null) {
+                            ObjectId sha1 = lastBuiltRevision.getSha1();
+                            if (sha1 != null) {
+                                String hash = sha1.getName();
+                                commitHashes.put(remote, hash);
+                            }
+                        }
+                    }
                 }
                 buildRemote = getBaseRemote(jobBaseSCM);
                 buildHash = commitHashes.get(buildRemote);

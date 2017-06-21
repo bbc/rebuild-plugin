@@ -7,6 +7,7 @@ import hudson.plugins.git.SubmoduleConfig;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.extensions.GitSCMExtension;
 import jenkins.plugins.git.GitSCMSource;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -124,6 +125,50 @@ public class PromotedJobWithPipelineLibs {
 
         WorkflowJob p = f.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleJobRepo.toString()).createSCM(), "Jenkinsfile"));
+        WorkflowRun b = story.waitForCompletion(p.scheduleBuild2(0).get());
+        story.assertLogContains("I am the first lib!", b);
+
+        libScript = "void printSomething() {\n" +
+                "  echo 'I am the second lib!'\n" +
+                "}";
+        sampleLibsRepo.write("vars/print.groovy", libScript);
+        sampleLibsRepo.git("add", "vars");
+        sampleLibsRepo.git("commit", "--message=update");
+        b = story.waitForCompletion(p.scheduleBuild2(0).get());
+        story.assertLogContains("I am the first lib!", b);
+
+        b = promoteBuildNumber(p, 1);
+        story.assertLogContains("I am the first lib!", b);
+    }
+
+    @Test
+    public void pipelineScriptWithLibButNoBaseScmCanBePromoted() throws Exception {
+
+        sampleLibsRepo.init();
+        String libScript = "void printSomething() {\n" +
+                "  echo 'I am the first lib!'\n" +
+                "}";
+        sampleLibsRepo.write("vars/print.groovy", libScript);
+        sampleLibsRepo.git("add", "vars");
+        sampleLibsRepo.git("commit", "--message=init");
+        sampleLibsRepo.git("tag", "1.0.0");
+
+        Folder f = story.jenkins.createProject(Folder.class, "f");
+        LibraryConfiguration libs = new LibraryConfiguration("libs",
+                new SCMRetriever(
+                        new GitSCM(Collections.singletonList(new UserRemoteConfig(sampleLibsRepo.fileUrl(), null, null, null)),
+                                Collections.singletonList(new BranchSpec("refs/tags/${library.libs.version}")),
+                                false, Collections.<SubmoduleConfig>emptyList(), null, null, Collections.<GitSCMExtension>emptyList())));
+        libs.setDefaultVersion("1.0.0");
+        libs.setImplicit(false);
+        libs.setAllowVersionOverride(true);
+        f.getProperties().add(new FolderLibraries(Collections.singletonList(libs)));
+
+        WorkflowJob p = f.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("@Library('libs') _\n" +
+                "node {\n" +
+                "   print.printSomething()\n" +
+                "}\n", true));
         WorkflowRun b = story.waitForCompletion(p.scheduleBuild2(0).get());
         story.assertLogContains("I am the first lib!", b);
 

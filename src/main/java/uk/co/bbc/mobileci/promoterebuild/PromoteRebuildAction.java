@@ -378,8 +378,10 @@ public class PromoteRebuildAction implements Action {
             buildRemote = new URIish(promoteRebuildCauseAction.getPromoteRebuildCause().getBuildRemote());
         } catch (URISyntaxException ignored) {
         }
-        RevisionParameterAction revisionParameterAction = new RevisionParameterAction(buildHash, buildRemote);
-        actions.add(revisionParameterAction);
+        if(buildHash != null && buildRemote != null) {
+            RevisionParameterAction revisionParameterAction = new RevisionParameterAction(buildHash, buildRemote);
+            actions.add(revisionParameterAction);
+        }
 
         return actions;
     }
