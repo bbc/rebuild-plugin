@@ -185,6 +185,74 @@ public class PromotedJobWithPipelineLibs {
         story.assertLogContains("I am the first lib!", b);
     }
 
+    @Test
+    public void deafaultLibCanBeOverriden() throws Exception {
+
+        sampleLibsRepo.init();
+        String libScript = "void printSomething() {\n" +
+                "  echo 'I am the first lib!'\n" +
+                "}";
+        sampleLibsRepo.write("vars/print.groovy", libScript);
+        sampleLibsRepo.git("add", "vars");
+        sampleLibsRepo.git("commit", "--message=init");
+        sampleLibsRepo.git("tag", "1.0.0");
+
+        sampleJobRepo.init();
+        String pipelineScript =
+                "@Library('libs') _\n" +
+                        "node {\n" +
+                        "  checkout scm\n" +
+                        "  print.printSomething()\n" +
+                        "}\n";
+        sampleJobRepo.write("Jenkinsfile", pipelineScript);
+        sampleJobRepo.git("add", "Jenkinsfile");
+        sampleJobRepo.git("commit", "--message=init");
+
+        Folder f = story.jenkins.createProject(Folder.class, "f");
+        LibraryConfiguration libs = new LibraryConfiguration("libs",
+                new SCMRetriever(
+                        new GitSCM(Collections.singletonList(new UserRemoteConfig(sampleLibsRepo.fileUrl(), null, null, null)),
+                                Collections.singletonList(new BranchSpec("refs/tags/${library.libs.version}")),
+                                false, Collections.<SubmoduleConfig>emptyList(), null, null, Collections.<GitSCMExtension>emptyList())));
+        libs.setDefaultVersion("1.0.0");
+        libs.setImplicit(false);
+        libs.setAllowVersionOverride(true);
+        f.getProperties().add(new FolderLibraries(Collections.singletonList(libs)));
+
+        WorkflowJob p = f.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleJobRepo.toString()).createSCM(), "Jenkinsfile"));
+        WorkflowRun b = story.waitForCompletion(p.scheduleBuild2(0).get());
+        story.assertLogContains("I am the first lib!", b);
+
+        libScript = "void printSomething() {\n" +
+                "  echo 'I am the second lib!'\n" +
+                "}";
+        sampleLibsRepo.write("vars/print.groovy", libScript);
+        sampleLibsRepo.git("add", "vars");
+        sampleLibsRepo.git("commit", "--message=update");
+        sampleLibsRepo.git("tag", "1.0.1");
+
+        b = story.waitForCompletion(p.scheduleBuild2(0).get());
+        story.assertLogContains("I am the first lib!", b);
+
+        pipelineScript =
+                "@Library('libs@1.0.1') _\n" +
+                        "node {\n" +
+                        "  checkout scm\n" +
+                        "  print.printSomething()\n" +
+                        "}\n";
+        sampleJobRepo.write("Jenkinsfile", pipelineScript);
+        sampleJobRepo.git("add", "Jenkinsfile");
+        sampleJobRepo.git("commit", "--message=init");
+        b = story.waitForCompletion(p.scheduleBuild2(0).get());
+        story.assertLogContains("I am the second lib!", b);
+
+        b = promoteBuildNumber(p, 1);
+        story.assertLogContains("I am the first lib!", b);
+        b = promoteBuildNumber(p, 3);
+        story.assertLogContains("I am the second lib!", b);
+    }
+
     private WorkflowRun promoteBuildNumber(WorkflowJob p, int buildNumber) throws IOException, SAXException, InterruptedException {
         WorkflowRun b;
         b = p.getBuildByNumber(buildNumber);
