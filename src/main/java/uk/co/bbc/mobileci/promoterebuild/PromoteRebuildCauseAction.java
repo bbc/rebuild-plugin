@@ -91,7 +91,8 @@ public class PromoteRebuildCauseAction implements Action {
 
         public PromoteRebuildCause(Run<?, ?> up) {
             upstreamCause = new Cause.UpstreamCause(up);
-            try {
+
+            if(getScm(up) != null) {
                 GitSCM jobBaseSCM = getScm(up);
                 List<BuildData> actions = up.getActions(BuildData.class);
                 Map<String, String> commitHashes = new HashMap<>();
@@ -110,12 +111,32 @@ public class PromoteRebuildCauseAction implements Action {
                 }
                 buildRemote = getBaseRemote(jobBaseSCM);
                 buildHash = commitHashes.get(buildRemote);
-            } catch(ClassCastException ignored) {
+
+            } else {
+                BuildData action = up.getAction(BuildData.class);
+                if (action != null) {
+                    if(action.getRemoteUrls().iterator().hasNext()) {
+                        this.buildRemote = action.getRemoteUrls().iterator().next();
+                        Revision lastBuiltRevision = action.getLastBuiltRevision();
+                        if (lastBuiltRevision != null) {
+                            ObjectId sha1 = lastBuiltRevision.getSha1();
+                            if (sha1 != null) {
+                                this.buildHash = sha1.getName();
+                            }
+                        }
+                    }
+                }
             }
+
         }
 
-        private GitSCM getScm(Run<?, ?> up) throws ClassCastException {
-            return (GitSCM) ((CpsScmFlowDefinition) ((WorkflowJob) up.getParent()).getDefinition()).getScm();
+        private GitSCM getScm(Run<?, ?> up) {
+            GitSCM scm = null;
+            try {
+                scm = (GitSCM) ((CpsScmFlowDefinition) ((WorkflowJob) up.getParent()).getDefinition()).getScm();
+            } catch (ClassCastException ignored) {
+            }
+            return scm;
         }
 
         private String getBaseRemote(GitSCM jobBaseSCM) {
