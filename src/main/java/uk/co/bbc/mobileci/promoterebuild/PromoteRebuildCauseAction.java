@@ -97,7 +97,7 @@ public class PromoteRebuildCauseAction implements Action {
                 List<BuildData> actions = up.getActions(BuildData.class);
                 Map<String, String> commitHashes = new HashMap<>();
                 for (BuildData action : actions) {
-                    if(action.getRemoteUrls().iterator().hasNext()) {
+                    if (action.getRemoteUrls().iterator().hasNext()) {
                         String remote = action.getRemoteUrls().iterator().next();
                         Revision lastBuiltRevision = action.getLastBuiltRevision();
                         if (lastBuiltRevision != null) {
@@ -112,20 +112,6 @@ public class PromoteRebuildCauseAction implements Action {
                 buildRemote = getBaseRemote(jobBaseSCM);
                 buildHash = commitHashes.get(buildRemote);
 
-            } else {
-                BuildData action = up.getAction(BuildData.class);
-                if (action != null) {
-                    if(action.getRemoteUrls().iterator().hasNext()) {
-                        this.buildRemote = action.getRemoteUrls().iterator().next();
-                        Revision lastBuiltRevision = action.getLastBuiltRevision();
-                        if (lastBuiltRevision != null) {
-                            ObjectId sha1 = lastBuiltRevision.getSha1();
-                            if (sha1 != null) {
-                                this.buildHash = sha1.getName();
-                            }
-                        }
-                    }
-                }
             }
 
         }
