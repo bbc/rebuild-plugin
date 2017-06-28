@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION_NAME=0.2.$BUILD_NUMBER
+VERSION_NAME=0.3.$BUILD_NUMBER
 
 function log_good
 {
