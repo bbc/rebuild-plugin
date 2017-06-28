@@ -24,20 +24,22 @@
  */
 package uk.co.bbc.mobileci.promoterebuild;
 
-import hudson.Extension;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
 import hudson.plugins.git.RevisionParameterAction;
 import jenkins.model.ParameterizedJobMixIn;
 import net.sf.json.JSONObject;
+import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Rebuild RootAction implementation class. This class will basically reschedule
@@ -371,8 +373,15 @@ public class PromoteRebuildAction implements Action {
         }
 
         String buildHash = promoteRebuildCauseAction.getPromoteRebuildCause().getBuildHash();
-        RevisionParameterAction revisionParameterAction = new RevisionParameterAction(buildHash);
-        actions.add(revisionParameterAction);
+        URIish buildRemote = null;
+        try {
+            buildRemote = new URIish(promoteRebuildCauseAction.getPromoteRebuildCause().getBuildRemote());
+        } catch (URISyntaxException ignored) {
+        }
+        if(buildHash != null && buildRemote != null) {
+            RevisionParameterAction revisionParameterAction = new RevisionParameterAction(buildHash, buildRemote);
+            actions.add(revisionParameterAction);
+        }
 
         return actions;
     }

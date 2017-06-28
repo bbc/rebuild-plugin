@@ -26,11 +26,16 @@ package uk.co.bbc.mobileci.promoterebuild;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.Run;
+import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+
+import java.util.*;
 
 /**
  * A cause specifying that the build was a rebuild of another build. Extends
@@ -82,19 +87,60 @@ public class PromoteRebuildCauseAction implements Action {
 
         private final Cause.UpstreamCause upstreamCause;
         private String buildHash;
+        private String buildRemote;
 
         public PromoteRebuildCause(Run<?, ?> up) {
             upstreamCause = new Cause.UpstreamCause(up);
-            BuildData action = up.getAction(BuildData.class);
-            if(action!=null) {
-                Revision lastBuiltRevision = action.getLastBuiltRevision();
-                if(lastBuiltRevision!=null) {
-                    ObjectId sha1 = lastBuiltRevision.getSha1();
-                    if (sha1!=null) {
-                        this.buildHash = sha1.getName();
+
+            if(getScm(up) != null) {
+                GitSCM jobBaseSCM = getScm(up);
+                List<BuildData> actions = up.getActions(BuildData.class);
+                Map<String, String> commitHashes = new HashMap<>();
+                for (BuildData action : actions) {
+                    if(action.getRemoteUrls().iterator().hasNext()) {
+                        String remote = action.getRemoteUrls().iterator().next();
+                        Revision lastBuiltRevision = action.getLastBuiltRevision();
+                        if (lastBuiltRevision != null) {
+                            ObjectId sha1 = lastBuiltRevision.getSha1();
+                            if (sha1 != null) {
+                                String hash = sha1.getName();
+                                commitHashes.put(remote, hash);
+                            }
+                        }
+                    }
+                }
+                buildRemote = getBaseRemote(jobBaseSCM);
+                buildHash = commitHashes.get(buildRemote);
+
+            } else {
+                BuildData action = up.getAction(BuildData.class);
+                if (action != null) {
+                    if(action.getRemoteUrls().iterator().hasNext()) {
+                        this.buildRemote = action.getRemoteUrls().iterator().next();
+                        Revision lastBuiltRevision = action.getLastBuiltRevision();
+                        if (lastBuiltRevision != null) {
+                            ObjectId sha1 = lastBuiltRevision.getSha1();
+                            if (sha1 != null) {
+                                this.buildHash = sha1.getName();
+                            }
+                        }
                     }
                 }
             }
+
+        }
+
+        private GitSCM getScm(Run<?, ?> up) {
+            GitSCM scm = null;
+            try {
+                scm = (GitSCM) ((CpsScmFlowDefinition) ((WorkflowJob) up.getParent()).getDefinition()).getScm();
+            } catch (ClassCastException ignored) {
+            }
+            return scm;
+        }
+
+        private String getBaseRemote(GitSCM jobBaseSCM) {
+            return jobBaseSCM.getUserRemoteConfigs().get(0).getUrl();
         }
 
         @Exported(
@@ -127,6 +173,10 @@ public class PromoteRebuildCauseAction implements Action {
 
         public String getBuildHash() {
             return this.buildHash;
+        }
+
+        public String getBuildRemote() {
+            return this.buildRemote;
         }
     }
 }
