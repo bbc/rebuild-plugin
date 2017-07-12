@@ -32,6 +32,8 @@ import hudson.plugins.git.util.BuildData;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -88,11 +90,15 @@ public class PromoteRebuildCauseAction implements Action {
         private final Cause.UpstreamCause upstreamCause;
         private String buildHash;
         private String buildRemote;
+        private boolean isPipeline = false;
+        private boolean isMultibranchPipeline = false;
 
         public PromoteRebuildCause(Run<?, ?> up) {
+            isMultibranchPipeline = isMultibranchPipeline(up);
+            isPipeline = !isMultibranchPipeline;
             upstreamCause = new Cause.UpstreamCause(up);
 
-            if(getScm(up) != null) {
+            if (getScm(up) != null) {
                 GitSCM jobBaseSCM = getScm(up);
                 List<BuildData> actions = up.getActions(BuildData.class);
                 Map<String, String> commitHashes = new HashMap<>();
@@ -116,10 +122,24 @@ public class PromoteRebuildCauseAction implements Action {
 
         }
 
+        private boolean isMultibranchPipeline(Run<?, ?> up) {
+            boolean result = false;
+
+            if(up != null) {
+                result = up.getParent().getParent() instanceof WorkflowMultiBranchProject;
+            }
+
+            return result;
+        }
+
         private GitSCM getScm(Run<?, ?> up) {
             GitSCM scm = null;
             try {
-                scm = (GitSCM) ((CpsScmFlowDefinition) ((WorkflowJob) up.getParent()).getDefinition()).getScm();
+                if (isPipeline) {
+                    scm = (GitSCM) ((CpsScmFlowDefinition) ((WorkflowJob) up.getParent()).getDefinition()).getScm();
+                } else if (isMultibranchPipeline) {
+                    scm = (GitSCM) up.getParent().getProperty(BranchJobProperty.class).getBranch().getScm();
+                }
             } catch (ClassCastException ignored) {
             }
             return scm;
