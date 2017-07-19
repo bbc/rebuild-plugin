@@ -1,14 +1,17 @@
 package uk.co.bbc.mobileci.promoterebuild.pipeline;
 
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
 import hudson.scm.ChangeLogSet;
+import hudson.scm.SCM;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
+import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.multibranch.BranchJobProperty;
@@ -22,23 +25,9 @@ import java.util.*;
 public final class BuildChangeSet {
 
     private WorkflowRun workflowRun;
-    private boolean isMultibranchPipeline = false;
-    private boolean isPipeline = false;
 
     public BuildChangeSet(WorkflowRun result) {
         this.workflowRun = result;
-        isMultibranchPipeline = isMultibranchPipeline(result);
-        isPipeline = !isMultibranchPipeline;
-    }
-
-    private boolean isMultibranchPipeline(WorkflowRun run) {
-        boolean result = false;
-
-        if(run != null) {
-            result = run.getParent().getParent() instanceof WorkflowMultiBranchProject;
-        }
-
-        return result;
     }
 
     @Whitelisted
@@ -112,16 +101,25 @@ public final class BuildChangeSet {
     }
 
     private GitSCM getScm(Run<?, ?> up) {
-        GitSCM scm = null;
-        try {
-            if(isPipeline) {
-                scm = (GitSCM) ((CpsScmFlowDefinition) ((WorkflowJob) up.getParent()).getDefinition()).getScm();
-            } else if (isMultibranchPipeline){
-                scm = (GitSCM) up.getParent().getProperty(BranchJobProperty.class).getBranch().getScm();
+        Job<?, ?> job = up.getParent();
+        GitSCM gitSCM = null;
+        if (job.getParent() instanceof WorkflowMultiBranchProject) {
+            SCM scm = job.getProperty(BranchJobProperty.class).getBranch().getScm();
+            if (scm instanceof GitSCM) {
+                gitSCM = (GitSCM) scm;
             }
-        } catch (ClassCastException ignored) {
+        } else if (job instanceof WorkflowJob) {
+            WorkflowJob workflowJob = (WorkflowJob) job;
+            FlowDefinition definition = workflowJob.getDefinition();
+            if (definition instanceof CpsScmFlowDefinition) {
+                CpsScmFlowDefinition cpsScmFlowDefinition = (CpsScmFlowDefinition) definition;
+                SCM scm = cpsScmFlowDefinition.getScm();
+                if (scm instanceof GitSCM) {
+                    gitSCM = (GitSCM) scm;
+                }
+            }
         }
-        return scm;
+        return gitSCM;
     }
 
     private String getBaseRemote(GitSCM jobBaseSCM) {
