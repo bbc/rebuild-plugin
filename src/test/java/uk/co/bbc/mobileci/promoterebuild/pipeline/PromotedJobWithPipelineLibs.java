@@ -6,7 +6,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.SubmoduleConfig;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.extensions.GitSCMExtension;
-import jenkins.plugins.git.GitSCMSource;
+import jenkins.plugins.git.GitStep;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -14,10 +14,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.libs.FolderLibraries;
 import org.jenkinsci.plugins.workflow.libs.LibraryConfiguration;
 import org.jenkinsci.plugins.workflow.libs.SCMRetriever;
-import org.jenkinsci.plugins.workflow.libs.SCMSourceRetriever;
 import org.jenkinsci.plugins.workflow.steps.scm.GitSampleRepoRule;
-import org.jenkinsci.plugins.workflow.steps.scm.GitStep;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,7 +23,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 
 

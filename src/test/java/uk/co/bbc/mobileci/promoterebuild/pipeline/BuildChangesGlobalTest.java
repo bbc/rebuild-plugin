@@ -2,12 +2,12 @@ package uk.co.bbc.mobileci.promoterebuild.pipeline;
 
 import hudson.plugins.git.util.BuildData;
 import hudson.scm.ChangeLogSet;
+import jenkins.plugins.git.GitStep;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.scm.GitSampleRepoRule;
-import org.jenkinsci.plugins.workflow.steps.scm.GitStep;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
